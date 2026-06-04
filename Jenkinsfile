@@ -9,12 +9,7 @@ pipeline {
 
     stages {
 
-        stage('Clone Repo') {
-            steps {
-                git 'https://github.com/nagaraj0205/nginx-k8s-app.git'
-            }
-        }
-
+        
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
