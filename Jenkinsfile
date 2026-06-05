@@ -2,36 +2,56 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = "ap-south-2"
-        ECR_REPO = "211425018449.dkr.ecr.ap-south-2.amazonaws.com/nginx-app"
+        IMAGE_NAME = "yourdockerhubuser/nginx-demo"
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
-        
+        stage('Clone') {
+            steps {
+                git 'https://github.com/nagaraj0205/k8s-Application-deployment-CICD.git'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
+                sh '''
+                docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                '''
             }
         }
 
-        stage('Push to ECR') {
+        stage('Docker Login') {
             steps {
-                sh """
-                aws ecr get-login-password --region $AWS_REGION | \
-                docker login --username AWS --password-stdin $ECR_REPO
-                docker push $ECR_REPO:$IMAGE_TAG
-                """
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
             }
         }
 
-        stage('Deploy to EKS') {
+        stage('Push Image') {
             steps {
-                sh """
-                aws eks update-kubeconfig --region $AWS_REGION --name nginx-cluster
-                kubectl set image deployment/nginx-deployment nginx=$ECR_REPO:$IMAGE_TAG
-                """
+                sh '''
+                docker push $IMAGE_NAME:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                kubectl set image deployment/nginx-demo \
+                nginx-demo=$IMAGE_NAME:$IMAGE_TAG
+                '''
             }
         }
     }
