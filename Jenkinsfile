@@ -48,12 +48,21 @@ pipeline {
         }
 
         stage('Deploy') {
-            steps {
-                sh '''
-                kubectl set image deployment/nginx-demo \
-                nginx-demo=$IMAGE_NAME:$IMAGE_TAG
-                '''
-            }
-        }
+    steps {
+        sh '''
+        whoami
+        echo "HOME=$HOME"
+
+        kubectl config current-context || true
+        kubectl config get-contexts || true
+
+        kubectl cluster-info || true
+
+        kubectl get nodes || true
+
+        kubectl api-resources | head -20 || true
+        '''
+    }
+}
     }
 }
