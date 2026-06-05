@@ -1,11 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-service
+  name: nginx-demo-service
+
 spec:
-  type: LoadBalancer
   selector:
-    app: nginx
+    app: nginx-demo
+
   ports:
   - port: 80
     targetPort: 80
+
+  type: LoadBalancer
