@@ -2,17 +2,18 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "yourdockerhubuser/nginx-demo"
+        IMAGE_NAME = "nagarajan02/nginx-demo"
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
         stage('Clone') {
-            steps {
-                git 'https://github.com/nagaraj0205/k8s-Application-deployment-CICD.git'
-            }
-        }
+    steps {
+        git branch: 'main',
+            url: 'https://github.com/nagaraj0205/k8s-Application-deployment-CICD.git'
+    }
+}
 
         stage('Build Docker Image') {
             steps {
